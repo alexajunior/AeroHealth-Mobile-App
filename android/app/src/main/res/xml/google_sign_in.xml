@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- This is a placeholder. It’s required by Firebase Auth for Google Sign-In -->
+</resources>
