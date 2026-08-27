@@ -1,4 +1,4 @@
-AeroHealth – Real-Time Air Quality Monitoring Mobile Application for a Healthier Future 🌍
+. AeroHealth – Real-Time Air Quality Monitoring Mobile Application for a Healthier Future 🌍
 
 AeroHealth is a powered web application that delivers real-time air quality insights to communities, health organizations, and policymakers. 
 
