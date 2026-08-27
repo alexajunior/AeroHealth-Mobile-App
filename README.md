@@ -1,10 +1,11 @@
-##AeroHealth – Real-Time Air Quality Monitoring Mobile Application for a Healthier Future 🌍
+AeroHealth – Real-Time Air Quality Monitoring Mobile Application for a Healthier Future 🌍
 
 AeroHealth is a powered web application that delivers real-time air quality insights to communities, health organizations, and policymakers. 
 
 It empowers users to make informed decisions and take action against air pollution.
 
-##KEY FEATURES
+KEY FEATURES
+
 📡 Live Air Quality Index (AQI) tracking by location
 
 📊 Interactive dashboards for pollution trends
@@ -17,7 +18,7 @@ It empowers users to make informed decisions and take action against air polluti
 
 🧠 AI-powered health recommendations based on air quality data
 
-##TECH STACK
+TECH STACK
 
 Flutter,HTML,Dart,C++ ,CMake, Javascript,etc.
 
@@ -30,6 +31,6 @@ APIs: OpenWeather & AQI APIs
 
 For help getting started with Flutter development, view the [online documentation](https://docs.flutter.dev/), which offers tutorials, samples, guidance on mobile development, and a full API reference.
 
-## Copyright
+Copyright
 
-© 2025 Alex Junior. All rights reserved. This work is the original creation of Alex Junior and is protected under copyright law.
+© 2026 Alex Junior. All rights reserved. This work is the original creation of Alex Junior and is protected under copyright law.
