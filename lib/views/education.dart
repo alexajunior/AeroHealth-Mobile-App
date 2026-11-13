@@ -1,5 +1,6 @@
 import 'package:aerohealth/views/devicesscreen.dart';
 import 'package:aerohealth/views/map.dart';
+import 'package:aerohealth/views/dashboard.dart';
 import 'package:flutter/material.dart';
 
 class EducationalScreen extends StatefulWidget {
@@ -59,30 +60,26 @@ class _EducationalScreenState extends State<EducationalScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.school), label: 'Learn More'),
         ],
         onTap: (index) {
-          if (index == 1) {
-            Navigator.push(
+          if (index == 0) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
+              (route) => false,
+            );
+          } else if (index == 1) {
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => const AQIMapScreen()),
             );
-          }
-          else if (index == 2) {
-            Navigator.push(
+          } else if (index == 2) {
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => const DevicesScreen()),
             );
-          }
-          if (index == 3) {
-            Navigator.push(
+          } else if (index == 3) {
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => const EducationalScreen()),
-            );
-          } else if (index != 0) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  '${['Devices', 'Buy', 'Ranking'][index - 2]} coming soon!',
-                ),
-              ),
             );
           }
         },

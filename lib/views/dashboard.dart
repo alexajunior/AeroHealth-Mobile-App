@@ -782,29 +782,25 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
         onTap: (index) {
           if (index == 1) {
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const AQIMapScreen()),
+              MaterialPageRoute(
+                builder: (context) => AQIMapScreen(
+                  initialPosition: _currentPosition,
+                ),
+              ),
             );
           }
           else if (index == 2) {
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => const DevicesScreen()),
             );
           }
-          if (index == 3) {
-            Navigator.push(
+          else if (index == 3) {
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => const EducationalScreen()),
-            );
-          } else if (index != 0) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  '${['Devices', 'Buy', 'Ranking'][index - 2]} coming soon!',
-                ),
-              ),
             );
           }
         },

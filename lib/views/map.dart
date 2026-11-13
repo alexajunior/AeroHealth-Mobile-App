@@ -4,15 +4,19 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:math' as math;
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:aerohealth/views/devicesscreen.dart';
 import 'package:aerohealth/views/education.dart';
+import 'package:aerohealth/views/dashboard.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
 
 class AQIMapScreen extends StatefulWidget {
-  const AQIMapScreen({super.key});
+  final Position? initialPosition;
+
+  const AQIMapScreen({super.key, this.initialPosition});
 
   @override
   State<AQIMapScreen> createState() => _AQIMapScreenState();
@@ -32,7 +36,7 @@ class _AQIMapScreenState extends State<AQIMapScreen> {
   String _selectedType = 'aqi'; // 'aqi' or 'pm2_5'
 
   GoogleMapController? _mapController;
-  LocationData? _userLocation;
+  LatLng? _userLocation;
   bool _isLoading = false;
   final Set<Marker> _aqiMarkers = {};
   final Set<TileOverlay> _tileOverlays = {};
@@ -44,17 +48,40 @@ class _AQIMapScreenState extends State<AQIMapScreen> {
   }
 
   Future<void> _initLocationAndAQI() async {
-    final location = Location();
-    if (!await location.serviceEnabled()) {
-      await location.requestService();
-    }
-    if (await location.hasPermission() == PermissionStatus.denied) {
-      await location.requestPermission();
-    }
+    try {
+      Position? position = widget.initialPosition;
+      if (position == null) {
+        if (!kIsWeb && !await Geolocator.isLocationServiceEnabled()) {
+          return;
+        }
 
-    final loc = await location.getLocation();
-    setState(() => _userLocation = loc);
-    _fetchAQIMarkers(loc.latitude!, loc.longitude!);
+        var permission = await Geolocator.checkPermission();
+        if (permission == LocationPermission.denied) {
+          permission = await Geolocator.requestPermission();
+        }
+        if (permission == LocationPermission.denied ||
+            permission == LocationPermission.deniedForever) {
+          return;
+        }
+
+        position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+        );
+      }
+
+      final resolvedPosition = position;
+      if (resolvedPosition == null) return;
+
+      final loc = LatLng(
+        resolvedPosition.latitude,
+        resolvedPosition.longitude,
+      );
+      if (!mounted) return;
+      setState(() => _userLocation = loc);
+      _fetchAQIMarkers(loc.latitude, loc.longitude);
+    } catch (e) {
+      debugPrint('Map location error: $e');
+    }
   }
 
   Future<void> _fetchAQIMarkers(double lat, double lon) async {
@@ -167,7 +194,7 @@ class _AQIMapScreenState extends State<AQIMapScreen> {
   @override
   Widget build(BuildContext context) {
     final initialPos = _userLocation != null
-        ? LatLng(_userLocation!.latitude!, _userLocation!.longitude!)
+        ? _userLocation!
         : const LatLng(0, 0);
 
     return Scaffold(
@@ -258,7 +285,7 @@ class _AQIMapScreenState extends State<AQIMapScreen> {
                     setState(() {
                       _selectedType = index == 0 ? 'aqi' : 'pm2_5';
                       if (_userLocation != null) {
-                        _fetchAQIMarkers(_userLocation!.latitude!, _userLocation!.longitude!);
+                        _fetchAQIMarkers(_userLocation!.latitude, _userLocation!.longitude);
                       }
                     });
                   },
@@ -285,30 +312,23 @@ class _AQIMapScreenState extends State<AQIMapScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.school), label: 'Learn More'),
         ],
         onTap: (index) {
-          if (index == 1) {
-            Navigator.push(
+          if (index == 0) {
+            Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => const AQIMapScreen()),
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
+              (route) => false,
             );
-          }
-          else if (index == 2) {
-            Navigator.push(
+          } else if (index == 1) {
+            return;
+          } else if (index == 2) {
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => const DevicesScreen()),
             );
-          }
-          if (index == 3) {
-            Navigator.push(
+          } else if (index == 3) {
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => const EducationalScreen()),
-            );
-          } else if (index != 0) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  '${['Devices', 'Buy', 'Ranking'][index - 2]} coming soon!',
-                ),
-              ),
             );
           }
         },
