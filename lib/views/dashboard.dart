@@ -933,13 +933,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-    )
-        .animate(onPlay: (controller) => controller.repeat())
-        .scaleXY(
-      begin: 0.95,
-      end: 1.0,
-      duration: 1.seconds,
-      curve: Curves.easeInOut,
     );
   }
 
