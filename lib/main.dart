@@ -2,6 +2,7 @@ import 'package:aerohealth/views/dashboard.dart';
 import 'package:aerohealth/views/login.dart';
 import 'package:aerohealth/views/splashscreen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -19,6 +20,10 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 FlutterLocalNotificationsPlugin();
 
 Future<void> initNotifications() async {
+  if (kIsWeb) {
+    return;
+  }
+
   const AndroidInitializationSettings androidSettings =
   AndroidInitializationSettings('@mipmap/ic_launcher');
 
@@ -64,18 +69,25 @@ class ErrorApp extends StatelessWidget {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initNotifications();
 
   try {
+    await initNotifications();
     await Firebase.initializeApp();
-    final messaging = FirebaseMessaging.instance;
-    await messaging.requestPermission();
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    runApp(const ProviderScope(child: MyApp()));
   } catch (e) {
-    print("Firebase initialization error: $e");
-    runApp(const ErrorApp());
+    debugPrint("Optional service initialization failed: $e");
   }
+
+  if (!kIsWeb) {
+    try {
+      final messaging = FirebaseMessaging.instance;
+      await messaging.requestPermission();
+      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    } catch (e) {
+      debugPrint("Notification setup failed: $e");
+    }
+  }
+
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatefulWidget {

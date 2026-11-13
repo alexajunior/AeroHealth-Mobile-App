@@ -15,7 +15,17 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     Future.delayed(const Duration(seconds: 3), () {
-      final user = FirebaseAuth.instance.currentUser;
+      User? user;
+      try {
+        user = FirebaseAuth.instance.currentUser;
+      } catch (e) {
+        debugPrint('Firebase Auth is unavailable: $e');
+      }
+
+      if (!mounted) {
+        return;
+      }
+
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (_) => user != null ? const HomeScreen() : const LoginPage(),
