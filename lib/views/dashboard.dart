@@ -201,7 +201,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     try {
-      if (!await Geolocator.isLocationServiceEnabled()) {
+      if (!kIsWeb && !await Geolocator.isLocationServiceEnabled()) {
         if (mounted) {
           setState(() => userCity = 'Location services are off');
         }
@@ -835,6 +835,15 @@ class _HomeScreenState extends State<HomeScreen> {
             fontWeight: FontWeight.w400,
           ),
         ),
+        if (_currentPosition == null)
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: ElevatedButton.icon(
+              onPressed: _loadDashboardData,
+              icon: const Icon(Icons.location_on),
+              label: const Text('Allow location'),
+            ),
+          ),
       ],
     );
   }

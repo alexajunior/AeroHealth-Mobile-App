@@ -269,8 +269,7 @@ class _AQIMapScreenState extends State<AQIMapScreen> {
               ),
             ),
           ),
-          SizedBox(
-            child: Positioned(
+          Positioned(
               right: 100,
               top: 10,
               child: Material(
@@ -295,7 +294,6 @@ class _AQIMapScreenState extends State<AQIMapScreen> {
                   ],
                 ),
               ),
-            ),
           ),
         ],
       ),
