@@ -648,29 +648,56 @@ class _HomeScreenState extends State<HomeScreen> {
             fit: BoxFit.cover,
           ),
           SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isCompact = constraints.maxWidth < 560;
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 1100),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                   _buildLocationHeader().animate().fadeIn(duration: 800.ms),
                   const SizedBox(height: 28),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: _buildAQICard().animate().scale(
+                  if (isCompact)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildAQICard().animate().scale(
                           duration: 800.ms,
                           curve: Curves.easeOut,
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      _buildAQIEmoji().animate().fadeIn(
-                        duration: 800.ms,
-                        delay: 200.ms,
-                      ),
-                    ],
-                  ),
+                        const SizedBox(height: 12),
+                        Align(
+                          alignment: Alignment.center,
+                          child: _buildAQIEmoji().animate().fadeIn(
+                            duration: 800.ms,
+                            delay: 200.ms,
+                          ),
+                        ),
+                      ],
+                    )
+                  else
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: _buildAQICard().animate().scale(
+                            duration: 800.ms,
+                            curve: Curves.easeOut,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        _buildAQIEmoji().animate().fadeIn(
+                          duration: 800.ms,
+                          delay: 200.ms,
+                        ),
+                      ],
+                    ),
                   const SizedBox(height: 28),
                   _buildPollutantsInfo().animate().slideY(
                     begin: 0.2,
@@ -705,8 +732,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     duration: 800.ms,
                     delay: 1200.ms,
                   ),
-                ],
-              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ],
