@@ -148,6 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
   double uvIndex = 0.0;
   List<int> forecastAQI = [];
   List<Map<String, dynamic>> hourlyWeather = [];
+  Position? _currentPosition;
   IconData _getWeatherIcon(String condition) {
     switch (condition.toLowerCase()) {
       case 'clear':
@@ -191,11 +192,61 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
 
-    fetchAQIData();// 🔁 Fetch AQI on launch
-    fetchPollutants();
-    fetchAQIForecast();
-    fetchHourlyWeather();
-    fetchWeatherInfo();
+    _loadDashboardData();
+  }
+
+  Future<Position?> _getDevicePosition() async {
+    if (_currentPosition != null) {
+      return _currentPosition;
+    }
+
+    try {
+      if (!await Geolocator.isLocationServiceEnabled()) {
+        if (mounted) {
+          setState(() => userCity = 'Location services are off');
+        }
+        return null;
+      }
+
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          setState(() => userCity = 'Location permission required');
+        }
+        return null;
+      }
+
+      _currentPosition = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      return _currentPosition;
+    } catch (e) {
+      debugPrint('Location initialization failed: $e');
+      if (mounted) {
+        setState(() => userCity = 'Location unavailable');
+      }
+      return null;
+    }
+  }
+
+  Future<void> _loadDashboardData() async {
+    final position = await _getDevicePosition();
+    if (position == null) {
+      return;
+    }
+
+    await Future.wait([
+      fetchAQIData(),
+      fetchPollutants(),
+      fetchAQIForecast(),
+      fetchHourlyWeather(),
+      fetchWeatherInfo(),
+    ]);
   }
 
 
@@ -206,10 +257,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final apiKey = '254a1023cb1fdfcf257a4c37a6a592e1'; // Replace with your actual API key
 
     try {
-      await Geolocator.requestPermission();
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+      final position = await _getDevicePosition();
+      if (position == null) {
+        return;
+      }
 
       _saveUserLocationAndToken(position); // ✅ Save location to Firestore
 
@@ -328,9 +379,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final openWeatherKey = '254a1023cb1fdfcf257a4c37a6a592e1';
 
     try {
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+      final position = await _getDevicePosition();
+      if (position == null) {
+        return;
+      }
 
       final url =
           'https://api.openweathermap.org/data/2.5/air_pollution?lat=${position.latitude}&lon=${position.longitude}&appid=$openWeatherKey';
@@ -361,9 +413,10 @@ class _HomeScreenState extends State<HomeScreen> {
     const token = '254a1023cb1fdfcf257a4c37a6a592e1';
 
     try {
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+      final position = await _getDevicePosition();
+      if (position == null) {
+        return;
+      }
 
       final lat = position.latitude;
       final lon = position.longitude;
@@ -403,9 +456,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final apiKey = '254a1023cb1fdfcf257a4c37a6a592e1'; // my openweather key
 
     try {
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+      final position = await _getDevicePosition();
+      if (position == null) {
+        return;
+      }
 
       final url =
           'https://api.openweathermap.org/data/2.5/forecast?lat=${position.latitude}&lon=${position.longitude}&units=metric&appid=$apiKey';
@@ -458,9 +512,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final apiKey = '254a1023cb1fdfcf257a4c37a6a592e1';
 
     try {
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+      final position = await _getDevicePosition();
+      if (position == null) {
+        return;
+      }
 
       final url =
           'https://api.openweathermap.org/data/2.5/weather?lat=${position.latitude}&lon=${position.longitude}&units=metric&appid=$apiKey';
