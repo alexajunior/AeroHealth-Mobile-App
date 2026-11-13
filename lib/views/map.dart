@@ -191,6 +191,17 @@ class _AQIMapScreenState extends State<AQIMapScreen> {
     );
   }
 
+  Future<void> _centerOnUserLocation() async {
+    if (_userLocation == null) {
+      await _initLocationAndAQI();
+      return;
+    }
+
+    await _mapController?.animateCamera(
+      CameraUpdate.newLatLngZoom(_userLocation!, 14),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final initialPos = _userLocation != null
@@ -294,6 +305,18 @@ class _AQIMapScreenState extends State<AQIMapScreen> {
                   ],
                 ),
               ),
+          ),
+          Positioned(
+            right: 16,
+            bottom: 20,
+            child: FloatingActionButton.small(
+              heroTag: 'my-location',
+              tooltip: 'Show my location',
+              onPressed: _centerOnUserLocation,
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.blue[800],
+              child: const Icon(Icons.my_location),
+            ),
           ),
         ],
       ),

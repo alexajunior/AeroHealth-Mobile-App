@@ -39,7 +39,9 @@ jobs:
       run: cp CNAME build/web/CNAME
 
     - name: Bust Flutter bundle cache
-      run: sed -i "s/main.dart.js/main.dart.js?v=${GITHUB_SHA}/g" build/web/flutter_bootstrap.js
+      run: |
+        sed -i "s/flutter_bootstrap.js/flutter_bootstrap.js?v=${GITHUB_SHA}/g" build/web/index.html
+        sed -i "s/main.dart.js/main.dart.js?v=${GITHUB_SHA}/g" build/web/flutter_bootstrap.js
 
     - name: Configure GitHub Pages
       uses: actions/configure-pages@v5
