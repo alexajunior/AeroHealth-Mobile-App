@@ -249,6 +249,73 @@ class _HomeScreenState extends State<HomeScreen> {
     ]);
   }
 
+  Future<Map<String, String>> _resolveLocationName(Position position) async {
+    try {
+      final placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+      if (placemarks.isNotEmpty) {
+        final placemark = placemarks.first;
+        final city = <String?>[
+          placemark.locality,
+          placemark.subAdministrativeArea,
+          placemark.administrativeArea,
+        ].whereType<String>().firstWhere(
+          (value) => value.trim().isNotEmpty,
+          orElse: () => '',
+        );
+        final country = placemark.country ?? '';
+        if (city.isNotEmpty || country.isNotEmpty) {
+          return {'city': city.isNotEmpty ? city : 'Your location', 'country': country};
+        }
+      }
+    } catch (e) {
+      debugPrint('Device geocoding unavailable: $e');
+    }
+
+    try {
+      const mapsApiKey = 'AIzaSyCNvZqqlb8QL5nM0E4KKZ7Q5zjtwZFE5tk';
+      final uri = Uri.https(
+        'maps.googleapis.com',
+        '/maps/api/geocode/json',
+        {
+          'latlng': '${position.latitude},${position.longitude}',
+          'key': mapsApiKey,
+        },
+      );
+      final response = await http.get(uri);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        final results = data['results'] as List<dynamic>? ?? [];
+        if (results.isNotEmpty) {
+          String city = '';
+          String country = '';
+          final components = results.first['address_components'] as List<dynamic>? ?? [];
+          for (final component in components) {
+            final types = List<String>.from(component['types'] ?? []);
+            final name = component['long_name'] as String? ?? '';
+            if (types.contains('locality') ||
+                types.contains('postal_town') ||
+                types.contains('administrative_area_level_2')) {
+              city = city.isEmpty ? name : city;
+            } else if (types.contains('country')) {
+              country = name;
+            }
+          }
+          return {
+            'city': city.isNotEmpty ? city : 'Your location',
+            'country': country,
+          };
+        }
+      }
+    } catch (e) {
+      debugPrint('Google reverse geocoding unavailable: $e');
+    }
+
+    return {'city': 'Your location', 'country': 'Location detected'};
+  }
+
 
   Future<void> fetchAQIData() async {
     if (!mounted) return;
@@ -280,20 +347,21 @@ class _HomeScreenState extends State<HomeScreen> {
         final main = _getMainPollutant(components);
         final convertedAQI = _mapOWAQIToUSScale(aqi);
 
-        // 🌍 Reverse geocode lat/lon to city/country
-        List<Placemark> placemarks = await placemarkFromCoordinates(
-          position.latitude,
-          position.longitude,
-        );
-        String city = placemarks[0].locality ?? placemarks[0].subAdministrativeArea ?? '';
-        String country = placemarks[0].country ?? '';
-
         setState(() {
-          userCity = city;
-          userCountry = country;
           mainPollutant = main.toUpperCase();
           liveAQI = convertedAQI;
+          currentAQI = convertedAQI;
         });
+
+        final locationName = await _resolveLocationName(position);
+        final city = locationName['city']!;
+        final country = locationName['country']!;
+        if (mounted) {
+          setState(() {
+            userCity = city;
+            userCountry = country;
+          });
+        }
 
         if (convertedAQI > 150) {
           await showLocalNotification(

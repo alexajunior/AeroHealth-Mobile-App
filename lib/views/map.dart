@@ -86,7 +86,7 @@ class _AQIMapScreenState extends State<AQIMapScreen> {
 
   Future<void> _fetchAQIMarkers(double lat, double lon) async {
     setState(() => _isLoading = true);
-    final url = 'http://api.openweathermap.org/data/2.5/air_pollution?lat=$lat&lon=$lon&appid=$_apiKey';
+    final url = 'https://api.openweathermap.org/data/2.5/air_pollution?lat=$lat&lon=$lon&appid=$_apiKey';
 
     try {
       final res = await http.get(Uri.parse(url));
