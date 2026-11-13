@@ -56,10 +56,13 @@ dependencies:
   flutter_local_notifications: ^19.3.0
   flutter_map: ^8.1.1
   latlong2: ^0.9.1
-  location: ^10.2.0
+  location: ^9.0.0
   geocoding: ^4.0.0
   url_launcher: ^6.3.1
   xml: ^6.5.0
+
+dependency_overrides:
+  location_platform_interface: 6.0.0
 
 
 
