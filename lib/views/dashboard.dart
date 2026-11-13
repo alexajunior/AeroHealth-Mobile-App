@@ -149,6 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<int> forecastAQI = [];
   List<Map<String, dynamic>> hourlyWeather = [];
   Position? _currentPosition;
+  bool _isSyncingLocationData = false;
   IconData _getWeatherIcon(String condition) {
     switch (condition.toLowerCase()) {
       case 'clear':
@@ -192,7 +193,9 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
 
-    _loadDashboardData();
+    if (!kIsWeb) {
+      _loadDashboardData();
+    }
   }
 
   Future<Position?> _getDevicePosition() async {
@@ -235,18 +238,32 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadDashboardData() async {
-    final position = await _getDevicePosition();
-    if (position == null) {
-      return;
-    }
+    if (_isSyncingLocationData) return;
 
-    await Future.wait([
-      fetchAQIData(),
-      fetchPollutants(),
-      fetchAQIForecast(),
-      fetchHourlyWeather(),
-      fetchWeatherInfo(),
-    ]);
+    setState(() {
+      _isSyncingLocationData = true;
+      userCity = 'Detecting location...';
+      userCountry = '';
+    });
+
+    try {
+      final position = await _getDevicePosition();
+      if (position == null) {
+        return;
+      }
+
+      await Future.wait([
+        fetchAQIData(),
+        fetchPollutants(),
+        fetchAQIForecast(),
+        fetchHourlyWeather(),
+        fetchWeatherInfo(),
+      ]);
+    } finally {
+      if (mounted) {
+        setState(() => _isSyncingLocationData = false);
+      }
+    }
   }
 
   Future<Map<String, String>> _resolveLocationName(Position position) async {
@@ -907,9 +924,19 @@ class _HomeScreenState extends State<HomeScreen> {
           Padding(
             padding: const EdgeInsets.only(top: 12),
             child: ElevatedButton.icon(
-              onPressed: _loadDashboardData,
-              icon: const Icon(Icons.location_on),
-              label: const Text('Allow location'),
+              onPressed: _isSyncingLocationData ? null : _loadDashboardData,
+              icon: _isSyncingLocationData
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.location_on),
+              label: Text(
+                _isSyncingLocationData
+                    ? 'Requesting location...'
+                    : 'Allow location',
+              ),
             ),
           ),
       ],
