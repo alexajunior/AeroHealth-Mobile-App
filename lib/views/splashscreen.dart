@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:aerohealth/views/login.dart';
 import 'package:aerohealth/views/dashboard.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -15,6 +16,17 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     Future.delayed(const Duration(seconds: 3), () {
+      if (kIsWeb) {
+        if (!mounted) {
+          return;
+        }
+
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+        );
+        return;
+      }
+
       User? user;
       try {
         user = FirebaseAuth.instance.currentUser;
