@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:aerohealth/views/devicesscreen.dart';
 import 'package:aerohealth/views/login.dart';
 import 'package:flutter/material.dart';
@@ -36,6 +37,10 @@ class UserProfile {
 
 
 void _setupNotifications(BuildContext ctx) async {
+  if (kIsWeb) {
+    return;
+  }
+
   FirebaseMessaging messaging = FirebaseMessaging.instance;
 
   NotificationSettings settings = await messaging.requestPermission(
@@ -67,6 +72,10 @@ void _setupNotifications(BuildContext ctx) async {
 }
 
 void _initializeNotifications() async {
+  if (kIsWeb) {
+    return;
+  }
+
   const AndroidInitializationSettings androidInitSettings =
   AndroidInitializationSettings('@mipmap/ic_launcher');
 
@@ -171,15 +180,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeNotifications();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _setupNotifications(context); // passing context safely
-    });
+    if (!kIsWeb) {
+      _initializeNotifications();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _setupNotifications(context);
+      });
 
-
-    FirebaseMessaging.instance.getToken().then((token) {
-      print('🔥 FCM Token: $token');
-    });
+      FirebaseMessaging.instance.getToken().then((token) {
+        print('🔥 FCM Token: $token');
+      });
+    }
 
     fetchAQIData();// 🔁 Fetch AQI on launch
     fetchPollutants();
@@ -477,6 +487,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> showLocalNotification(String title, String body) async {
+    if (kIsWeb) {
+      return;
+    }
+
     const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
       'aqi_channel',
       'AQI Alerts',
