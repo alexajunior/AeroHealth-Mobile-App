@@ -24,26 +24,7 @@ Flutter,HTML,Dart,C++ ,CMake, Javascript,etc.
 
 Database: Firebase
 
-APIs: OpenWeather & AQI APIs
-
-WEB DEPLOYMENT
-
-The Flutter web app deploys to GitHub Pages from the `main` branch through
-[`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml).
-The configured custom domain is `ah.softpear.app`.
-
-At the domain registrar, create a CNAME record with:
-
-- Host/name: `ah`
-- Target/value: `alexajunior.github.io`
-
-In the repository's Settings > Pages, select GitHub Actions as the source.
-After DNS propagation, enable HTTPS for the custom domain.
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the [online documentation](https://docs.flutter.dev/), which offers tutorials, samples, guidance on mobile development, and a full API reference.
+APIs: OpenWeather & AQI APIs.
 
 Copyright
 
