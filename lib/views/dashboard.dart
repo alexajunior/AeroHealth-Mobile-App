@@ -193,9 +193,6 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
 
-    if (!kIsWeb) {
-      _loadDashboardData();
-    }
   }
 
   Future<Position?> _getDevicePosition() async {
